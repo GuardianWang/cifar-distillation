@@ -1,0 +1,4 @@
+__pycache__
+*.tar.gz
+.idea
+cifar-100-python
