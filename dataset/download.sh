@@ -1,1 +1,1 @@
-python -c "import torchvision;torchvision.datasets.CIFAR100(root='.', download=True)"
+python -c "import torchvision;torchvision.datasets.CIFAR100(root='..', download=True)"
