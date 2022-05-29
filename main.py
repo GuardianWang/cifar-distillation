@@ -52,9 +52,12 @@ def test_step(model, criterion, loader, device, cfg):
 
 
 def train(cfg):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    if cfg.not_use_gpu:
+    if not torch.cuda.is_available() or cfg.not_use_gpu:
         device = torch.device("cpu")
+    else:
+        if cfg.benchmark:
+            torch.backends.cudnn.benchmark = True
+        device = torch.device("cuda")
     logging.info(f"device: {device}")
 
     model = ResNet(cfg).to(device)

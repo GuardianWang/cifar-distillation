@@ -34,6 +34,7 @@ def update_argument(parser: argparse.ArgumentParser):
 
     # gpu
     parser.add_argument("--not_use_gpu", action="store_true")
+    parser.add_argument("--benchmark", action="store_true")
 
     # test metrics
     parser.add_argument("--acc_top_k", nargs='+', default=[1, 5])
