@@ -47,7 +47,7 @@ def test_step(model, criterion, loader, device, cfg):
     info = ["[test]"]
     for k, v in zip(cfg.acc_top_k, accuracy.value()):
         info.append(f"[top-{k} acc: {v:.4f}%]")
-    logging.info(info)
+    logging.info("".join(info))
     return ave_loss.value()[0]
 
 
