@@ -43,3 +43,9 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--classes", type=int, default=100)
 
     return parser
+
+
+def get_cfg():
+    parser = argparse.ArgumentParser()
+    update_argument(parser)
+    return parser.parse_args()
