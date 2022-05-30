@@ -1,13 +1,17 @@
+from utils.parser import get_cfg
+
 import torchvision.models as models
 from torch import nn, randn
 import torch
+
+from pytorch_model_summary import summary
 
 
 class ResNet(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
-        resnet = models.resnet50(pretrained=False)
+        resnet = models.resnet18(pretrained=False)
         self.backbone = nn.Sequential(*list(resnet.children())[:-1])
         self.fc = nn.Linear(resnet.fc.in_features, cfg.classes)
 
@@ -18,17 +22,16 @@ class ResNet(nn.Module):
         return x
 
 
+def count_parameters(model):
+    return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+
 def test_resnet(in_shape=(2, 3, 32, 32)):
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model = ResNet().to(device)
-    print(model)
-    model = model.train()
-    data = randn(in_shape).to(device)
-    o = model(data)
-    print(o.shape)
-    model = model.eval()
-    o = model(data)
-    print(o.shape)
+    cfg = get_cfg()
+    model = ResNet(cfg)
+    data = randn(in_shape)
+    summary(model, data, show_input=False, show_hierarchical=True,
+            print_summary=True, max_depth=None, show_parent_layers=True)
 
 
 if __name__ == "__main__":
