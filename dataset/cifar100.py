@@ -11,7 +11,6 @@ def get_data(root=r".", train=True, batch_size=4):
     transform = []
     if train:
         transform.extend([
-            transforms.ToPILImage(),
             transforms.RandomHorizontalFlip()
         ])
     transform.extend([
