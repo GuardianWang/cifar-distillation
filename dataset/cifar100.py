@@ -8,11 +8,17 @@ from multiprocessing import cpu_count
 
 
 def get_data(root=r".", train=True, batch_size=4):
-    base_transform = [transforms.ToTensor(),
-                      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]
+    transform = []
     if train:
-        base_transform.append(transforms.RandomHorizontalFlip())
-    transform = transforms.Compose(base_transform)
+        transform.extend([
+            transforms.ToPILImage(),
+            transforms.RandomHorizontalFlip()
+        ])
+    transform.extend([
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+    transform = transforms.Compose(transform)
 
     dataset = torchvision.datasets.CIFAR100(root=root, train=train,
                                             download=True, transform=transform)
