@@ -1,6 +1,7 @@
 from model.resnet import ResNet
+from model.resnet_original import ResNetOriginal
 from dataset.cifar100 import get_data
-from utils.parser import update_argument
+from utils.parser import get_cfg
 
 import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -8,7 +9,6 @@ from torch import nn
 import torch
 from torchnet import meter
 
-import argparse
 import logging
 
 
@@ -60,7 +60,7 @@ def train(cfg):
         device = torch.device("cuda")
     logging.info(f"device: {device}")
 
-    model = ResNet(cfg).to(device)
+    model = ResNetOriginal(cfg).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=cfg.lr, momentum=cfg.momentum, weight_decay=cfg.weight_decay)
     scheduler = ReduceLROnPlateau(optimizer, factor=cfg.factor, patience=cfg.patience, cooldown=cfg.cooldown)
@@ -82,18 +82,12 @@ def test(cfg):
     if cfg.not_use_gpu:
         device = torch.device("cpu")
     logging.info(f"device: {device}")
-    model = ResNet(cfg).to(device)
+    model = ResNetOriginal(cfg).to(device)
     logging.info(f"load model weight {cfg.model_path}")
     model.load_state_dict(torch.load(cfg.model_path))
     criterion = nn.CrossEntropyLoss()
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
     test_step(model, criterion, test_loader, device=device, cfg=cfg)
-
-
-def get_cfg():
-    parser = argparse.ArgumentParser()
-    update_argument(parser)
-    return parser.parse_args()
 
 
 def run():
