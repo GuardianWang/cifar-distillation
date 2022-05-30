@@ -49,3 +49,9 @@ def get_cfg():
     parser = argparse.ArgumentParser()
     update_argument(parser)
     return parser.parse_args()
+
+
+def cfg_to_str(cfg):
+    cfg = vars(cfg)
+    string = "\n".join([f"{k}: {v}" for k, v in cfg.items()])
+    return string

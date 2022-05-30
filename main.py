@@ -1,7 +1,7 @@
 from model.resnet import ResNet
 from model.resnet_original import ResNetOriginal
 from dataset.cifar100 import get_data
-from utils.parser import get_cfg
+from utils.parser import get_cfg, cfg_to_str
 
 import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
@@ -94,6 +94,7 @@ def run():
     cfg = get_cfg()
     logging.basicConfig(filename=cfg.log_path, level=logging.INFO,
                         format='%(asctime)s - %(message)s', datefmt='%b-%d-%y %H:%M:%S')
+    logging.info(f"config:\n{cfg_to_str(cfg)}")
     if cfg.train:
         train(cfg)
     else:
