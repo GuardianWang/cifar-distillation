@@ -1,2 +1,1 @@
-import resnet
-import resnet_original
+from model import resnet, resnet_original
