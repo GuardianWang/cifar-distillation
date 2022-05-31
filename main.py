@@ -63,7 +63,8 @@ def train(cfg):
     model = ResNetOriginal(cfg).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=cfg.lr, momentum=cfg.momentum, weight_decay=cfg.weight_decay)
-    scheduler = ReduceLROnPlateau(optimizer, factor=cfg.factor, patience=cfg.patience, cooldown=cfg.cooldown)
+    scheduler = ReduceLROnPlateau(optimizer, factor=cfg.factor, patience=cfg.patience,
+                                  cooldown=cfg.cooldown, verbose=True)
     train_dataset, train_loader = get_data(root=cfg.data_root, train=True, batch_size=cfg.train_batch_size)
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
 
