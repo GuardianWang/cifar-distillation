@@ -24,7 +24,7 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--patience", type=int, default=10)
     parser.add_argument("--cooldown", type=int, default=10)
     # multistep
-    parser.add_argument("--milestones", nargs='+', default=[80, 120])
+    parser.add_argument("--milestones", nargs='+', type=int, default=[80, 120])
     parser.add_argument("--gamma", type=float, default=0.1)
 
     # epoch and batch
@@ -37,7 +37,7 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--benchmark", action="store_true")
 
     # test metrics
-    parser.add_argument("--acc_top_k", nargs='+', default=[1, 5])
+    parser.add_argument("--acc_top_k", nargs='+', type=int, default=[1, 5])
 
     # model
     parser.add_argument("--model", type=str, default="resnet50",
