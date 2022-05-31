@@ -30,7 +30,7 @@ def test_resnet(in_shape=(1, 3, 32, 32)):
     cfg = get_cfg()
     model = ResNet(cfg)
     data = randn(in_shape)
-
+    print(summary(model, data))
 
 
 if __name__ == "__main__":
