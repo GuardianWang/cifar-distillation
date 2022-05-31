@@ -7,9 +7,9 @@ import numpy as np
 from multiprocessing import cpu_count
 
 
-def get_data(root=r".", train=True, batch_size=4):
+def get_data(root=r".", train=True, batch_size=4, augment_train=True):
     transform = []
-    if train:
+    if train and augment_train:
         transform.extend([
             transforms.RandomHorizontalFlip()
         ])

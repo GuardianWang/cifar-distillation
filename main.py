@@ -86,7 +86,8 @@ def test(cfg):
     logging.info(f"load model weight {cfg.model_path}")
     model.load_state_dict(torch.load(cfg.model_path))
     criterion = nn.CrossEntropyLoss()
-    train_dataset, train_loader = get_data(root=cfg.data_root, train=True, batch_size=cfg.train_batch_size)
+    train_dataset, train_loader = get_data(root=cfg.data_root, train=True,
+                                           batch_size=cfg.train_batch_size, augment_train=False)
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
     logging.info(f"===evaluate on test set===")
     test_step(model, criterion, test_loader, device=device, cfg=cfg)
