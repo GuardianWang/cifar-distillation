@@ -21,6 +21,7 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--momentum", type=float, default=1e-3)
     parser.add_argument("--weight_decay", type=float, default=1e-3)
+    parser.add_argument("--nesterov", action="store_true")
 
     # scheduler
     parser.add_argument("--factor", type=float, default=0.1)
