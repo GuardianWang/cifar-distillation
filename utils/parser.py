@@ -28,7 +28,7 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--patience", type=int, default=10)
     parser.add_argument("--cooldown", type=int, default=10)
     # multistep
-    parser.add_argument("--milestones", nargs='+', default=[80, 120])
+    parser.add_argument("--milestones", action="extend", nargs='+', default=[80, 120])
     parser.add_argument("--gamma", type=float, default=0.1)
 
     # epoch and batch
