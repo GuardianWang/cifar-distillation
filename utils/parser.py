@@ -40,7 +40,9 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--acc_top_k", nargs='+', default=[1, 5])
 
     # model
-    parser.add_argument("--model", type=str, default="resnet50")
+    parser.add_argument("--model", type=str, default="resnet50",
+                        choices=("resnet18", "resnet50", "resnet101", "resnet152",
+                                 "resnet_cifar"))
     parser.add_argument("--classes", type=int, default=100)
     # save model
     parser.add_argument("--save_model_freq", type=int, default=20)
