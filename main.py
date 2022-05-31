@@ -70,6 +70,7 @@ def train(cfg):
 
     for epoch in range(cfg.train_epoch):
         logging.info(f"===epoch {epoch:04d}===")
+        logging.info(f"lr: {scheduler.get_lr()}")
         train_loss = train_step(model, criterion, optimizer, train_loader, device=device, cfg=cfg)
         if epoch % cfg.test_epoch_freq == 0:
             test_step(model, criterion, test_loader, device=device, cfg=cfg)
