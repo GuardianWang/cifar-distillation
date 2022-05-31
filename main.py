@@ -1,5 +1,4 @@
-from model.resnet import ResNet
-from model.resnet_original import ResNetOriginal
+from model.get_model import get_model
 from dataset.cifar100 import get_data
 from utils.parser import get_cfg, cfg_to_str
 
@@ -60,7 +59,7 @@ def train(cfg):
         device = torch.device("cuda")
     logging.info(f"device: {device}")
 
-    model = ResNetOriginal(cfg).to(device)
+    model = get_model(cfg).to(device)
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.SGD(model.parameters(), lr=cfg.lr, momentum=cfg.momentum,
                           weight_decay=cfg.weight_decay, nesterov=cfg.nesterov)
@@ -84,7 +83,7 @@ def test(cfg):
     if cfg.not_use_gpu:
         device = torch.device("cpu")
     logging.info(f"device: {device}")
-    model = ResNetOriginal(cfg).to(device)
+    model = get_model(cfg).to(device)
     logging.info(f"load model weight {cfg.model_path}")
     model.load_state_dict(torch.load(cfg.model_path))
     criterion = nn.CrossEntropyLoss()

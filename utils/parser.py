@@ -13,10 +13,6 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--test_epoch_freq", type=int, default=10)
     parser.add_argument("--log_path", type=str, default="run.log")
 
-    # save model
-    parser.add_argument("--save_model_freq", type=int, default=20)
-    parser.add_argument("--model_path", type=str, default="resnet50.pth")
-
     # optimizer
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--momentum", type=float, default=1e-3)
@@ -44,7 +40,11 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--acc_top_k", nargs='+', default=[1, 5])
 
     # model
+    parser.add_argument("--model", type=str, default="resnet50")
     parser.add_argument("--classes", type=int, default=100)
+    # save model
+    parser.add_argument("--save_model_freq", type=int, default=20)
+    parser.add_argument("--model_path", type=str, default="resnet50.pth")
 
     return parser
 

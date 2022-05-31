@@ -11,7 +11,16 @@ class ResNet(nn.Module):
     def __init__(self, cfg):
         super().__init__()
         self.cfg = cfg
-        resnet = models.resnet18(pretrained=False)
+        if cfg.model == "resnet18":
+            resnet = models.resnet18(pretrained=False)
+        elif cfg.model == "resnet50":
+            resnet = models.resnet50(pretrained=False)
+        elif cfg.model == "resnet101":
+            resnet = models.resnet101(pretrained=False)
+        elif cfg.model == "resnet152":
+            resnet = models.resnet152(pretrained=False)
+        else:
+            raise ValueError(f"{cfg.model} not defined")
         self.backbone = nn.Sequential(*list(resnet.children())[:-1])
         self.fc = nn.Linear(resnet.fc.in_features, cfg.classes)
 
