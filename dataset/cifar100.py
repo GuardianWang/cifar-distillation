@@ -12,11 +12,11 @@ def get_data(root=r".", train=True, batch_size=4, augment_train=True):
     transform = []
     if train and augment_train:
         transform.extend([
+            transforms.RandomCrop(32, padding=4),
             Cutout(),
             transforms.RandomHorizontalFlip()
         ])
     transform.extend([
-        transforms.RandomCrop(32, padding=4),
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
