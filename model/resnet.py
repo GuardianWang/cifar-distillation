@@ -4,7 +4,7 @@ import torchvision.models as models
 from torch import nn, randn
 import torch
 
-from pytorch_model_summary import summary
+from torchtoolbox.tools import summary
 
 
 class ResNet(nn.Module):
@@ -26,12 +26,11 @@ def count_parameters(model):
     return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
 
-def test_resnet(in_shape=(2, 3, 32, 32)):
+def test_resnet(in_shape=(1, 3, 32, 32)):
     cfg = get_cfg()
     model = ResNet(cfg)
     data = randn(in_shape)
-    summary(model, data, show_input=False, show_hierarchical=True,
-            print_summary=True, max_depth=None, show_parent_layers=True)
+
 
 
 if __name__ == "__main__":

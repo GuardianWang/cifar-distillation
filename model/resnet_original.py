@@ -3,7 +3,7 @@ https://pytorch-tutorial.readthedocs.io/en/latest/tutorial/chapter03_intermediat
 """
 from utils.parser import get_cfg
 from torch import nn, randn
-from pytorch_model_summary import summary
+from torchtoolbox.tools import summary
 
 
 def conv3x3(in_channels, out_channels, stride=1):
@@ -73,12 +73,11 @@ class ResNetOriginal(nn.Module):
         return out
 
 
-def test_model(in_shape=(2, 3, 32, 32)):
+def test_model(in_shape=(1, 3, 32, 32)):
     cfg = get_cfg()
     model = ResNetOriginal(cfg)
     data = randn(in_shape)
-    summary(model, data, show_input=False, show_hierarchical=True,
-            print_summary=True, max_depth=None, show_parent_layers=True)
+    print(summary(model, data))
 
 
 if __name__ == "__main__":
