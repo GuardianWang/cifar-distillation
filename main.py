@@ -69,13 +69,13 @@ def train(cfg):
 
     for epoch in range(cfg.train_epoch):
         logging.info(f"===epoch {epoch:04d}===")
-        logging.info(f"lr: {scheduler.get_lr()}")
+        logging.info(f"lr: {scheduler.get_last_lr()}")
         train_loss = train_step(model, criterion, optimizer, train_loader, device=device, cfg=cfg)
         if epoch % cfg.test_epoch_freq == 0:
             test_step(model, criterion, test_loader, device=device, cfg=cfg)
         if epoch > 0 and epoch % cfg.save_model_freq == 0:
             torch.save(model.state_dict(), cfg.model_path)
-        scheduler.step(epoch)
+        scheduler.step()
 
 
 def test(cfg):
