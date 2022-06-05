@@ -8,9 +8,16 @@ from torchtoolbox.transform import Cutout
 from multiprocessing import cpu_count
 
 
-def get_data(root=r".", train=True, batch_size=4, augment_train=True):
+def get_data(root=r".", train=True, batch_size=4, augment_train=True, extra_augment=False):
     transform = []
     if train and augment_train:
+        if extra_augment:
+            transform.extend([
+                transforms.ColorJitter(0.5, 0.5, 0.5, 0.5),
+                transforms.RandomAffine(180, translate=(0.1, 0.1), scale=(0.5, 1), shear=90),
+                transforms.RandomPerspective(),
+                transforms.RandomGrayscale(),
+            ])
         transform.extend([
             transforms.RandomCrop(32, padding=4),
             Cutout(),
