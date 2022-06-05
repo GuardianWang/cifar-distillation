@@ -7,6 +7,7 @@ def update_argument(parser: argparse.ArgumentParser):
 
     # data
     parser.add_argument("--data_root", type=str, default=r".")
+    parser.add_argument("--extra_augment", action="store_true")
 
     # logging
     parser.add_argument("--train_batch_print_freq", type=int, default=10)
