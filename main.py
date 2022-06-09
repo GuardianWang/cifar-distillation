@@ -44,10 +44,10 @@ def distill_step(teacher, student, hard_criterion, soft_criterion, optimizer, lo
         student_outputs = student(inputs)
         teacher_outputs = teacher(inputs)
         scale = 1 / cfg.temperature
-        student_log_prob = F.log_softmax(student_outputs * scale)
-        teacher_log_prob = F.log_softmax(teacher_outputs * scale)
+        student_log_prob = F.log_softmax(student_outputs * scale, dim=-1)
+        teacher_prob = F.softmax(teacher_outputs * scale, dim=-1)
         hard_loss = hard_criterion(student_outputs, labels)
-        soft_loss = soft_criterion(student_log_prob, teacher_log_prob)
+        soft_loss = soft_criterion(student_log_prob, teacher_prob)
         loss = (1 - cfg.hard_weight) * soft_loss + cfg.hard_weight * hard_loss
         loss.backward()
         optimizer.step()
@@ -133,7 +133,7 @@ def distill(cfg):
     student = get_model(cfg, cfg.student).to(device)
 
     hard_criterion = nn.CrossEntropyLoss()
-    soft_criterion = nn.KLDivLoss(log_target=True)
+    soft_criterion = nn.KLDivLoss()
     optimizer = optim.SGD(student.parameters(), lr=cfg.lr, momentum=cfg.momentum,
                           weight_decay=cfg.weight_decay, nesterov=cfg.nesterov)
     scheduler = MultiStepLR(optimizer, milestones=cfg.milestones, gamma=cfg.gamma)
