@@ -14,7 +14,6 @@ def get_data(root=r".", train=True, batch_size=4, augment_train=True, extra_augm
         if extra_augment:
             transform.extend([
                 transforms.ColorJitter(0.5, 0.5, 0.5, 0.5),
-                transforms.RandomPerspective(),
                 transforms.RandomGrayscale(),
             ])
         transform.extend([
