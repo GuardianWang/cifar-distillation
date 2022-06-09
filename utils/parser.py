@@ -2,8 +2,11 @@ import argparse
 
 
 def update_argument(parser: argparse.ArgumentParser):
+    parser_run_mode = parser.add_mutually_exclusive_group()
+
     # run
-    parser.add_argument("--train", action="store_true")
+    parser_run_mode.add_argument("--train", action="store_true")
+    parser_run_mode.add_argument("--distill", action="store_true")
 
     # data
     parser.add_argument("--data_root", type=str, default=r".")
@@ -41,10 +44,15 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--acc_top_k", nargs='+', type=int, default=[1, 5])
 
     # model
-    parser.add_argument("--model", type=str, default="resnet50",
-                        choices=("resnet18", "resnet50", "resnet101", "resnet152",
-                                 "resnet_cifar"))
+    model_choices = ("resnet18", "resnet50", "resnet101", "resnet152", "resnet_cifar")
+    parser.add_argument("--model", type=str, default="resnet50", choices=model_choices)
     parser.add_argument("--classes", type=int, default=100)
+    # distillation
+    parser.add_argument("--teacher", type=str, default="resnet_cifar", choices=model_choices)
+    parser.add_argument("--student", type=str, default="resnet18", choices=model_choices)
+    parser.add_argument("--hard_weight", type=float, default=0.1)
+    parser.add_argument("--temperature", type=float, default=20)
+
     # save model
     parser.add_argument("--save_model_freq", type=int, default=20)
     parser.add_argument("--model_path", type=str, default="resnet50.pth")
