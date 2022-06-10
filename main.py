@@ -106,7 +106,7 @@ def train(cfg):
     train_dataset, train_loader = get_data(root=cfg.data_root, train=True,
                                            batch_size=cfg.train_batch_size, extra_augment=cfg.extra_augment)
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
-    logging.info(f"model:\n{summary(model.eval(), torch.randn((1,) + test_dataset[0][0].shape))}")
+    logging.info(f"model:\n{summary(model.eval(), torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
 
     for epoch in range(cfg.train_epoch):
         logging.info(f"===epoch {epoch:04d}===")
