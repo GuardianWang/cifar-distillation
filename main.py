@@ -8,6 +8,7 @@ from torch import nn
 import torch
 import torch.nn.functional as F
 from torchnet import meter
+from torchtoolbox.tools import summary
 
 import logging
 
@@ -105,6 +106,7 @@ def train(cfg):
     train_dataset, train_loader = get_data(root=cfg.data_root, train=True,
                                            batch_size=cfg.train_batch_size, extra_augment=cfg.extra_augment)
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
+    logging.info(f"model:\n{summary(model.eval(), torch.randn((1,) + test_dataset[0][0].shape))}")
 
     for epoch in range(cfg.train_epoch):
         logging.info(f"===epoch {epoch:04d}===")
@@ -140,6 +142,8 @@ def distill(cfg):
     train_dataset, train_loader = get_data(root=cfg.data_root, train=True,
                                            batch_size=cfg.train_batch_size, extra_augment=cfg.extra_augment)
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
+    logging.info(f"teacher:\n{summary(teacher.eval(), torch.randn((1,) + test_dataset[0][0].shape))}")
+    logging.info(f"student:\n{summary(student.eval(), torch.randn((1,) + test_dataset[0][0].shape))}")
 
     for epoch in range(cfg.train_epoch):
         logging.info(f"===epoch {epoch:04d}===")
@@ -159,12 +163,13 @@ def test(cfg):
         device = torch.device("cpu")
     logging.info(f"device: {device}")
     model = get_model(cfg, cfg.model).to(device)
-    logging.info(f"load model weight {cfg.model_path}")
-    model.load_state_dict(torch.load(cfg.model_path))
     criterion = nn.CrossEntropyLoss()
     train_dataset, train_loader = get_data(root=cfg.data_root, train=True,
                                            batch_size=cfg.train_batch_size, augment_train=False)
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
+    logging.info(f"model:\n{summary(model.eval(), torch.randn((1,) + test_dataset[0][0].shape))}")
+    logging.info(f"load model weight {cfg.model_path}")
+    model.load_state_dict(torch.load(cfg.model_path))
     logging.info(f"===evaluate on test set===")
     test_step(model, criterion, test_loader, device=device, cfg=cfg)
     logging.info(f"===evaluate on training set===")
