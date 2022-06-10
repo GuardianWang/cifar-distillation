@@ -49,6 +49,7 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--classes", type=int, default=100)
     # distillation
     parser.add_argument("--teacher", type=str, default="resnet_cifar", choices=model_choices)
+    parser.add_argument("--teacher_path", type=str, default="resnet_original_20.pth")
     parser.add_argument("--student", type=str, default="resnet18", choices=model_choices)
     parser.add_argument("--hard_weight", type=float, default=0.1)
     parser.add_argument("--temperature", type=float, default=20)

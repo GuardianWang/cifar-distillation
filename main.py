@@ -106,7 +106,7 @@ def train(cfg):
     train_dataset, train_loader = get_data(root=cfg.data_root, train=True,
                                            batch_size=cfg.train_batch_size, extra_augment=cfg.extra_augment)
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
-    logging.info(f"model:\n{summary(model.eval(), torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
+    logging.info(f"model:\n{summary(model, torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
 
     for epoch in range(cfg.train_epoch):
         logging.info(f"===epoch {epoch:04d}===")
@@ -142,8 +142,10 @@ def distill(cfg):
     train_dataset, train_loader = get_data(root=cfg.data_root, train=True,
                                            batch_size=cfg.train_batch_size, extra_augment=cfg.extra_augment)
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
-    logging.info(f"teacher:\n{summary(teacher.eval(), torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
-    logging.info(f"student:\n{summary(student.eval(), torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
+    logging.info(f"teacher:\n{summary(teacher, torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
+    logging.info(f"student:\n{summary(student, torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
+    logging.info(f"load teacher model weight {cfg.teacher_path}")
+    teacher.load_state_dict(torch.load(cfg.teacher_path))
 
     for epoch in range(cfg.train_epoch):
         logging.info(f"===epoch {epoch:04d}===")
@@ -167,7 +169,7 @@ def test(cfg):
     train_dataset, train_loader = get_data(root=cfg.data_root, train=True,
                                            batch_size=cfg.train_batch_size, augment_train=False)
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
-    logging.info(f"model:\n{summary(model.eval(), torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
+    logging.info(f"model:\n{summary(model, torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
     logging.info(f"load model weight {cfg.model_path}")
     model.load_state_dict(torch.load(cfg.model_path))
     logging.info(f"===evaluate on test set===")
