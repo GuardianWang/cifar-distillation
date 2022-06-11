@@ -22,14 +22,23 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--momentum", type=float, default=1e-3)
     parser.add_argument("--weight_decay", type=float, default=1e-3)
     parser.add_argument("--nesterov", action="store_true")
+    # adamw
+    parser.add_argument("--beta1", type=float, default=0.9)
+    parser.add_argument("--beta2", type=float, default=0.999)
 
     # scheduler
+    # plateau
     parser.add_argument("--factor", type=float, default=0.1)
     parser.add_argument("--patience", type=int, default=10)
     parser.add_argument("--cooldown", type=int, default=10)
     # multistep
     parser.add_argument("--milestones", nargs='+', type=int, default=[80, 120])
     parser.add_argument("--gamma", type=float, default=0.1)
+    # cosine
+    parser.add_argument("--T_0", type=int, default=10)
+    parser.add_argument("--T_mult", type=int, default=2)
+    parser.add_argument("--mult_gamma", type=float, default=0.999)
+    parser.add_argument("--warmup_iter", type=int, default=10)
 
     # epoch and batch
     parser.add_argument("--train_batch_size", type=int, default=64)
