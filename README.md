@@ -5,7 +5,7 @@ can perform better than the small network used for distillation.
 
 Experiments:
 - [x] large network w/o distillation
-- [ ] large network w/ aggressive augmentation
+- [x] large network w/ aggressive augmentation
 - [ ] large network w/ distillation
 - [ ] large network w/ distillation and aggressive augmentation
 
