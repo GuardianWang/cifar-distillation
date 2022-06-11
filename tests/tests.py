@@ -1,5 +1,6 @@
 from model.get_model import get_model
 from utils.parser import get_cfg
+from optimizer import get_optimizer, get_scheduler
 from dataset.cifar100 import get_data, get_classes
 
 import torch.optim as optim
@@ -21,6 +22,21 @@ class Tests(unittest.TestCase):
         super().__init__(method_name)
         self.cfg = get_cfg()
 
+    def test_used_scheduler(self):
+        cfg = self.cfg
+        cfg.T_0 = 100
+        cfg.lr = 0.1
+        cfg.mult_gamma = 0.999
+        model = get_model(cfg=cfg, name=cfg.model)
+        optimizer = get_optimizer(cfg, model)
+        scheduler = get_scheduler(optimizer, cfg)
+        lrs = []
+        for i in range(600):
+            lrs.append(scheduler.get_lr())
+            optimizer.step()
+            scheduler.step()
+        plot_line(lrs)
+
     def test_multistep_scheduler(self):
         cfg = self.cfg
         model = get_model(cfg=cfg, name=cfg.model)
@@ -31,9 +47,7 @@ class Tests(unittest.TestCase):
         for i in range(1000):
             scheduler.step()
             lrs.append(scheduler.get_last_lr())
-        plt.plot(range(1000), lrs)
-        plt.show()
-        plt.close('all')
+        plot_line(lrs)
 
     def test_cosineannealingwarmrestarts_scheduler(self):
         cfg = self.cfg
@@ -45,9 +59,7 @@ class Tests(unittest.TestCase):
         for i in range(100):
             scheduler.step()
             lrs.append(scheduler.get_last_lr())
-        plt.plot(range(100), lrs)
-        plt.show()
-        plt.close('all')
+        plot_line(lrs)
 
     def test_cosineannealingwarmrestarts_warmup_scheduler(self):
         cfg = self.cfg
@@ -63,9 +75,7 @@ class Tests(unittest.TestCase):
             else:
                 scheduler.step()
             lrs.append(get_lr(optimizer))
-        plt.plot(range(100), lrs)
-        plt.show()
-        plt.close('all')
+        plot_line(lrs)
 
     def test_cosineannealingwarmrestarts_warmup_decay_scheduler(self):
         cfg = self.cfg
@@ -83,9 +93,7 @@ class Tests(unittest.TestCase):
                 scheduler.step()
                 scheduler2.step()
             lrs.append(get_lr(optimizer))
-        plt.plot(range(100), lrs)
-        plt.show()
-        plt.close('all')
+        plot_line(lrs)
 
     def test_cosineannealingwarmrestarts_exp_scheduler(self):
         cfg = self.cfg
@@ -100,9 +108,7 @@ class Tests(unittest.TestCase):
             scheduler.step()
             scheduler2.step()
             lrs.append(get_lr(optimizer))
-        plt.plot(range(100), lrs)
-        plt.show()
-        plt.close('all')
+        plot_line(lrs)
 
     def test_cosineannealingwarmrestarts_step_scheduler(self):
         cfg = self.cfg
@@ -117,9 +123,7 @@ class Tests(unittest.TestCase):
             scheduler.step()
             scheduler2.step()
             lrs.append(get_lr(optimizer))
-        plt.plot(range(100), lrs)
-        plt.show()
-        plt.close('all')
+        plot_line(lrs)
 
     def test_cosineannealinglr_scheduler(self):
         cfg = self.cfg
@@ -131,9 +135,7 @@ class Tests(unittest.TestCase):
         for i in range(100):
             scheduler.step()
             lrs.append(scheduler.get_last_lr())
-        plt.plot(range(100), lrs)
-        plt.show()
-        plt.close('all')
+        plot_line(lrs)
 
     def test_get_data(self, root=r"..", batch_size=4):
         def show_batch(loader):
@@ -157,6 +159,12 @@ class Tests(unittest.TestCase):
         show_batch(train_loader)
         print("show test loader")
         show_batch(test_loader)
+
+
+def plot_line(lrs):
+    plt.plot(range(len(lrs)), lrs)
+    plt.show()
+    plt.close('all')
 
 
 def imshow(img):
