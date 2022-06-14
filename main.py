@@ -244,14 +244,14 @@ def run_tune(cfg):
     result = tune.run(
         partial(tune_param, cfg=cfg),
         resources_per_trial={
-            "cpu": min(4, psutil.cpu_count(True)),
+            "cpu": psutil.cpu_count(True) / torch.cuda.device_count(),
             "gpu": 0 if cfg.not_use_gpu else 1,
         },
         config=config,
         num_samples=cfg.tune_num_samples,
         scheduler=scheduler,
         progress_reporter=reporter,
-        log_to_file=True,
+        log_to_file=cfg.log_path,
     )
 
     best_trial = result.get_best_trial("test_loss", "min", "last")
