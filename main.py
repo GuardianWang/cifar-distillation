@@ -221,12 +221,54 @@ def test(cfg):
     test_step(model, criterion, train_loader, device=device, cfg=cfg)
 
 
+def run_tune(cfg):
+    config = {
+        # optimizer
+        "optimizer": tune.choice(["sgd", "adamw", "adam"]),
+        "lr": tune.loguniform(1e-4, 1),
+        "momentum": tune.loguniform(1e-2, 1e-5),
+        "weight_decay": tune.loguniform(1e-2, 1e-5),
+        "nesterov": tune.choice([True, False]),
+        "amsgrad": tune.choice([True, False]),
+        "betas": tune.choice([(0.5, 0.9), (0.9, 0.999)]),
+    }
+    scheduler = tune.schedulers.ASHAScheduler(
+        metric="test_loss",
+        mode="min",
+        max_t=cfg.tune_num_epochs,
+        grace_period=1,
+        reduction_factor=2)
+    reporter = tune.CLIReporter(
+        metric_columns=["train_loss", "test_loss", "training_iteration"])
+    result = tune.run(
+        partial(tune_param, cfg=cfg),
+        resources_per_trial={
+            "cpu": min(4, psutil.cpu_count(True)),
+            "gpu": 0 if cfg.not_use_gpu else 1,
+        },
+        config=config,
+        num_samples=cfg.tune_num_samples,
+        scheduler=scheduler,
+        progress_reporter=reporter,
+        log_to_file=True,
+    )
+
+    best_trial = result.get_best_trial("test_loss", "min", "last")
+    logging.info("Best trial config: {}".format(best_trial.config))
+    logging.info("Best trial final test loss: {}".format(
+        best_trial.last_result["test_loss"]))
+    logging.info("Best trial final train loss: {}".format(
+        best_trial.last_result["train_loss"]))
+
+
 def run():
     cfg = get_cfg()
     logging.basicConfig(filename=cfg.log_path, level=logging.INFO,
                         format='%(asctime)s - %(message)s', datefmt='%b-%d-%y %H:%M:%S')
     logging.info(f"config:\n{cfg_to_str(cfg)}")
-    if cfg.train:
+    if cfg.tune:
+        run_tune(cfg)
+    elif cfg.train:
         train(cfg)
     elif cfg.distill:
         distill(cfg)
