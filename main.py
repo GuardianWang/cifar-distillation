@@ -251,7 +251,7 @@ def run_tune(cfg):
         num_samples=cfg.tune_num_samples,
         scheduler=scheduler,
         progress_reporter=reporter,
-        log_to_file=cfg.log_path,
+        log_to_file=True,
     )
 
     best_trial = result.get_best_trial("test_loss", "min", "last")
