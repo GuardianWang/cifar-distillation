@@ -133,6 +133,7 @@ def tune_param(config: dict, cfg):
     cfg.weight_decay = config["weight_decay"]
     cfg.nesterov = config["nesterov"]
     cfg.amsgrad = config["amsgrad"]
+    cfg.train_batch_size = config["train_batch_size"]
     cfg.beta1, cfg.beta2 = config["betas"]
 
     if not torch.cuda.is_available() or cfg.not_use_gpu:
@@ -232,6 +233,7 @@ def run_tune(cfg):
         "nesterov": tune.choice([True, False]),
         "amsgrad": tune.choice([True, False]),
         "betas": tune.choice([(0.5, 0.9), (0.9, 0.999)]),
+        "train_batch_size": tune.choice([64, 128, 256, 512, 1024]),
     }
     scheduler = tune.schedulers.ASHAScheduler(
         metric="test_loss",
