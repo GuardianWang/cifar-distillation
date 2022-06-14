@@ -9,7 +9,12 @@ import torch.nn.functional as F
 from torchnet import meter
 from torchtoolbox.tools import summary
 
+from ray import tune
+
 import logging
+from functools import partial
+from copy import deepcopy
+import psutil
 
 
 def train_step(model, criterion, optimizer, loader, device, cfg):
@@ -118,6 +123,41 @@ def train(cfg):
 
     logging.info(f"===evaluate on training set===")
     test_step(model, criterion, train_loader, device=device, cfg=cfg)
+
+
+def tune_param(config: dict, cfg):
+    cfg = deepcopy(cfg)
+    cfg.optimizer = config["optimizer"]
+    cfg.lr = config["lr"]
+    cfg.momentum = config["momentum"]
+    cfg.weight_decay = config["weight_decay"]
+    cfg.nesterov = config["nesterov"]
+    cfg.amsgrad = config["amsgrad"]
+    cfg.beta1, cfg.beta2 = config["betas"]
+
+    if not torch.cuda.is_available() or cfg.not_use_gpu:
+        device = torch.device("cpu")
+    else:
+        if cfg.benchmark:
+            torch.backends.cudnn.benchmark = True
+        device = torch.device("cuda")
+    logging.info(f"device: {device}")
+
+    model = get_model(cfg, cfg.model).to(device)
+    criterion = nn.CrossEntropyLoss()
+
+    optimizer = get_optimizer(cfg, model)
+    train_dataset, train_loader = get_data(root=cfg.data_root, train=True,
+                                           batch_size=cfg.train_batch_size, extra_augment=cfg.extra_augment)
+    test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
+    logging.info(f"model:\n{summary(model, torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
+
+    for epoch in range(cfg.tune_num_epochs):
+        logging.info(f"===epoch {epoch:04d}===")
+        logging.info(f"lr: {cfg.lr}")
+        train_loss = train_step(model, criterion, optimizer, train_loader, device=device, cfg=cfg)
+        test_loss = test_step(model, criterion, test_loader, device=device, cfg=cfg)
+        tune.report(train_loss=train_loss, test_loss=test_loss)
 
 
 def distill(cfg):
