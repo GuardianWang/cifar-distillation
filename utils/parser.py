@@ -5,8 +5,13 @@ def update_argument(parser: argparse.ArgumentParser):
     parser_run_mode = parser.add_mutually_exclusive_group()
 
     # run
+    parser_run_mode.add_argument("--tune", action="store_true")
     parser_run_mode.add_argument("--train", action="store_true")
     parser_run_mode.add_argument("--distill", action="store_true")
+
+    # tune
+    parser.add_argument("--tune_num_samples", type=int, default=2)
+    parser.add_argument("--tune_num_epochs", type=int, default=10)
 
     # data
     parser.add_argument("--data_root", type=str, default=r".")
@@ -18,6 +23,7 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--log_path", type=str, default="run.log")
 
     # optimizer
+    parser.add_argument("--optimizer", type=str, default="adamw")
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--momentum", type=float, default=1e-3)
     parser.add_argument("--weight_decay", type=float, default=1e-3)
@@ -25,6 +31,7 @@ def update_argument(parser: argparse.ArgumentParser):
     # adamw
     parser.add_argument("--beta1", type=float, default=0.9)
     parser.add_argument("--beta2", type=float, default=0.999)
+    parser.add_argument("--amsgrad", action="store_true")
 
     # scheduler
     # plateau
