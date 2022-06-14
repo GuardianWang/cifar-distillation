@@ -139,7 +139,8 @@ def tune_param(config: dict, cfg):
         device = torch.device("cpu")
     else:
         if cfg.benchmark:
-            torch.backends.cudnn.benchmark = True
+            # https://github.com/ray-project/ray/issues/8569#issuecomment-1139534091
+            eval('setattr(torch.backends.cudnn, "benchmark", True)')
         device = torch.device("cuda")
     logging.info(f"device: {device}")
 
