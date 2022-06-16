@@ -246,7 +246,7 @@ def run_tune(cfg):
     result = tune.run(
         partial(tune_param, cfg=cfg),
         resources_per_trial={
-            "cpu": psutil.cpu_count(True) / torch.cuda.device_count(),
+            "cpu": psutil.cpu_count(True) // torch.cuda.device_count(),
             "gpu": 0 if cfg.not_use_gpu else 1,
         },
         config=config,
