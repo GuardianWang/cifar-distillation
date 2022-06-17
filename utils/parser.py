@@ -21,6 +21,7 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--train_batch_print_freq", type=int, default=10)
     parser.add_argument("--test_epoch_freq", type=int, default=10)
     parser.add_argument("--log_path", type=str, default="run.log")
+    parser.add_argument("--ray_local_dir", type=str, default="~/ray_results")
 
     # optimizer
     parser.add_argument("--optimizer", type=str, default="adamw")

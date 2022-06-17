@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from torchnet import meter
 from torchtoolbox.tools import summary
 
+import ray
 from ray import tune
 
 import logging
@@ -235,6 +236,9 @@ def run_tune(cfg):
         "betas": tune.choice([(0.5, 0.9), (0.9, 0.999)]),
         "train_batch_size": tune.choice([64, 128, 256, 512, 1024]),
     }
+    config_str = {k: v.domain_str for k, v in config}
+    logging.info(f"tune params:\n{config_str}")
+
     scheduler = tune.schedulers.ASHAScheduler(
         metric="test_loss",
         mode="min",
@@ -254,6 +258,7 @@ def run_tune(cfg):
         scheduler=scheduler,
         progress_reporter=reporter,
         log_to_file=True,
+        local_dir=cfg.ray_local_dir,
     )
 
     best_trial = result.get_best_trial("test_loss", "min", "last")
