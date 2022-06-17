@@ -270,8 +270,10 @@ def run_tune(cfg):
         local_dir=cfg.ray_local_dir,
     )
 
-    best_trial = result.get_best_trial("test_loss", "min", "last")
+    best_trial = result.get_best_trial("test_acc", "max", "all")
     logging.info("Best trial config: {}".format(best_trial.config))
+    logging.info("Best trial final test acc: {}".format(
+        best_trial.last_result["test_acc"]))
     logging.info("Best trial final test loss: {}".format(
         best_trial.last_result["test_loss"]))
     logging.info("Best trial final train loss: {}".format(
