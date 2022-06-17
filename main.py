@@ -34,7 +34,9 @@ def train_step(model, criterion, optimizer, loader, device, cfg):
         if i % cfg.train_batch_print_freq == 0:
             logging.info(f"[train][batch {i:05d}][loss: {ave_loss.value()[0]:.4f}]")
     logging.info(f"[train][epoch loss: {ave_loss.value()[0]:.4f}]")
-    return ave_loss.value()[0]
+    return {
+        "loss": ave_loss.value()[0],
+    }
 
 
 def distill_step(teacher, student, hard_criterion, soft_criterion, optimizer, loader, device, cfg):
@@ -71,7 +73,11 @@ def distill_step(teacher, student, hard_criterion, soft_criterion, optimizer, lo
                  f"[hard loss: {ave_hard_loss.value()[0]:.4f}]"
                  f"[soft loss: {ave_soft_loss.value()[0]:.4f}]"
                  )
-    return ave_weighted_loss.value()[0]
+    return {
+        "weighted_loss": ave_weighted_loss.value()[0],
+        "hard_loss": ave_hard_loss.value()[0],
+        "soft_loss": ave_soft_loss.value()[0],
+    }
 
 
 def test_step(model, criterion, loader, device, cfg):
@@ -91,7 +97,10 @@ def test_step(model, criterion, loader, device, cfg):
     for k, v in zip(cfg.acc_top_k, accuracy.value()):
         info.append(f"[top-{k} acc: {v:.4f}%]")
     logging.info("".join(info))
-    return ave_loss.value()[0]
+    return {
+        "loss": ave_loss.value()[0],
+        "acc": accuracy.value(),
+    }
 
 
 def train(cfg):
@@ -160,7 +169,7 @@ def tune_param(config: dict, cfg):
         logging.info(f"lr: {cfg.lr}")
         train_loss = train_step(model, criterion, optimizer, train_loader, device=device, cfg=cfg)
         test_loss = test_step(model, criterion, test_loader, device=device, cfg=cfg)
-        tune.report(train_loss=train_loss, test_loss=test_loss)
+        tune.report(train_loss=train_loss["loss"], test_loss=test_loss["loss"], test_acc=test_loss["acc"][0])
 
 
 def distill(cfg):
@@ -240,13 +249,13 @@ def run_tune(cfg):
     logging.info(f"tune params:\n{config_str}")
 
     scheduler = tune.schedulers.ASHAScheduler(
-        metric="test_loss",
-        mode="min",
+        metric="test_acc",
+        mode="max",
         max_t=cfg.tune_num_epochs,
-        grace_period=1,
+        grace_period=10,
         reduction_factor=2)
     reporter = tune.CLIReporter(
-        metric_columns=["train_loss", "test_loss", "training_iteration"])
+        metric_columns=["train_loss", "test_loss", "test_acc", "training_iteration"])
     result = tune.run(
         partial(tune_param, cfg=cfg),
         resources_per_trial={
