@@ -245,7 +245,7 @@ def run_tune(cfg):
         "betas": tune.choice([(0.5, 0.9), (0.9, 0.999)]),
         "train_batch_size": tune.choice([64, 128, 256, 512, 1024]),
     }
-    config_str = {k: v.domain_str for k, v in config}
+    config_str = {k: v.domain_str for k, v in config.items()}
     logging.info(f"tune params:\n{config_str}")
 
     scheduler = tune.schedulers.ASHAScheduler(
