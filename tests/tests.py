@@ -24,14 +24,14 @@ class Tests(unittest.TestCase):
 
     def test_used_scheduler(self):
         cfg = self.cfg
-        cfg.T_0 = 100
+        cfg.T_0 = 10
         cfg.lr = 0.1
-        cfg.mult_gamma = 0.999
+        cfg.mult_gamma = 0.998
         model = get_model(cfg=cfg, name=cfg.model)
         optimizer = get_optimizer(cfg, model)
         scheduler = get_scheduler(optimizer, cfg)
         lrs = []
-        for i in range(600):
+        for i in range(2000):
             lrs.append(scheduler.get_lr())
             optimizer.step()
             scheduler.step()
