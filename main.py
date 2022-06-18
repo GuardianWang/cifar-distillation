@@ -130,7 +130,7 @@ def train(cfg):
         train_loss = train_step(model, criterion, optimizer, train_loader, device=device, cfg=cfg)
         if epoch % cfg.test_epoch_freq == 0:
             test_stat = test_step(model, criterion, test_loader, device=device, cfg=cfg)
-            is_test_best = test_stat["acc"][0] > min_max_test_acc.value(metric="max")
+            is_test_best = epoch > 0 and test_stat["acc"][0] > min_max_test_acc.value(metric="max")
             min_max_test_acc.add(test_stat["acc"][0])
 
             if epoch > cfg.save_model_cooldown and is_test_best:
@@ -216,7 +216,7 @@ def distill(cfg):
                                   optimizer, train_loader, device, cfg)
         if epoch % cfg.test_epoch_freq == 0:
             test_stat = test_step(student, hard_criterion, test_loader, device=device, cfg=cfg)
-            is_test_best = test_stat["acc"][0] > min_max_test_acc.value(metric="max")
+            is_test_best = epoch > 0 and test_stat["acc"][0] > min_max_test_acc.value(metric="max")
             min_max_test_acc.add(test_stat["acc"][0])
             if epoch > cfg.save_model_cooldown and is_test_best:
                 torch.save(student.state_dict(), cfg.model_path)
