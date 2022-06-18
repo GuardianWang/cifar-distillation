@@ -72,7 +72,7 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--temperature", type=float, default=20)
 
     # save model
-    parser.add_argument("--save_model_freq", type=int, default=20)
+    parser.add_argument("--save_model_cooldown", type=int, default=0)
     parser.add_argument("--model_path", type=str, default="resnet50.pth")
 
     return parser
