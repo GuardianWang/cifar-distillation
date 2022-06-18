@@ -2,6 +2,7 @@ from model.get_model import get_model
 from dataset.cifar100 import get_data
 from optimizer import get_optimizer, get_scheduler
 from utils.parser import get_cfg, cfg_to_str
+from utils.meters import MinMaxMeter
 
 from torch import nn
 import torch
@@ -121,16 +122,23 @@ def train(cfg):
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
     logging.info(f"model:\n{summary(model, torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
 
+    min_max_test_acc = MinMaxMeter()
+
     for epoch in range(cfg.train_epoch):
         logging.info(f"===epoch {epoch:04d}===")
         logging.info(f"lr: {scheduler.get_lr()}")
         train_loss = train_step(model, criterion, optimizer, train_loader, device=device, cfg=cfg)
         if epoch % cfg.test_epoch_freq == 0:
-            test_step(model, criterion, test_loader, device=device, cfg=cfg)
-        if epoch > 0 and epoch % cfg.save_model_freq == 0:
-            torch.save(model.state_dict(), cfg.model_path)
+            test_stat = test_step(model, criterion, test_loader, device=device, cfg=cfg)
+            is_test_best = test_stat["acc"][0] > min_max_test_acc.value(metric="max")
+            min_max_test_acc.add(test_stat["acc"][0])
+
+            if epoch > cfg.save_model_cooldown and is_test_best:
+                torch.save(model.state_dict(), cfg.model_path)
         scheduler.step()
 
+    logging.info(f"===evaluate on test set===")
+    test_step(model, criterion, test_loader, device=device, cfg=cfg)
     logging.info(f"===evaluate on training set===")
     test_step(model, criterion, train_loader, device=device, cfg=cfg)
 
@@ -199,15 +207,19 @@ def distill(cfg):
     logging.info(f"load teacher model weight {cfg.teacher_path}")
     teacher.load_state_dict(torch.load(cfg.teacher_path))
 
+    min_max_test_acc = MinMaxMeter()
+
     for epoch in range(cfg.train_epoch):
         logging.info(f"===epoch {epoch:04d}===")
         logging.info(f"lr: {scheduler.get_lr()}")
         train_loss = distill_step(teacher, student, hard_criterion, soft_criterion,
                                   optimizer, train_loader, device, cfg)
         if epoch % cfg.test_epoch_freq == 0:
-            test_step(student, hard_criterion, test_loader, device=device, cfg=cfg)
-        if epoch > 0 and epoch % cfg.save_model_freq == 0:
-            torch.save(student.state_dict(), cfg.model_path)
+            test_stat = test_step(student, hard_criterion, test_loader, device=device, cfg=cfg)
+            is_test_best = test_stat["acc"][0] > min_max_test_acc.value(metric="max")
+            min_max_test_acc.add(test_stat["acc"][0])
+            if epoch > cfg.save_model_cooldown and is_test_best:
+                torch.save(student.state_dict(), cfg.model_path)
         scheduler.step()
 
     logging.info(f"===evaluate on training set===")
