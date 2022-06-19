@@ -13,10 +13,6 @@ def update_argument(parser: argparse.ArgumentParser):
     parser.add_argument("--tune_num_samples", type=int, default=2)
     parser.add_argument("--tune_num_epochs", type=int, default=10)
 
-    # data
-    parser.add_argument("--data_root", type=str, default=r".")
-    parser.add_argument("--extra_augment", action="store_true")
-
     # logging
     parser.add_argument("--train_batch_print_freq", type=int, default=10)
     parser.add_argument("--test_epoch_freq", type=int, default=10)
@@ -74,6 +70,30 @@ def update_argument(parser: argparse.ArgumentParser):
     # save model
     parser.add_argument("--save_model_cooldown", type=int, default=0)
     parser.add_argument("--model_path", type=str, default="resnet50.pth")
+
+    # data
+    parser.add_argument("--data_root", type=str, default=r".")
+    parser.add_argument("--extra_augment", action="store_true")
+    # ColorJitter
+    parser.add_argument("--ColorJitter", action="store_true")
+    parser.add_argument("--brightness", type=float, default=0.5)
+    parser.add_argument("--contrast", type=float, default=0.5)
+    parser.add_argument("--saturation", type=float, default=0.5)
+    parser.add_argument("--hue", type=float, default=0.5)
+    # RandomAffine
+    parser.add_argument("--RandomAffine", action="store_true")
+    parser.add_argument("--degrees", type=float, default=90)
+    parser.add_argument("--translate_M", type=float, default=0.5)
+    parser.add_argument("--scale_m", type=float, default=0.5)
+    parser.add_argument("--scale_M", type=float, default=2)
+    parser.add_argument("--shear", type=float, default=45)
+    # RandomPerspective
+    parser.add_argument("--RandomPerspective", action="store_true")
+    parser.add_argument("--distortion_scale", type=float, default=0.5)
+    parser.add_argument("--perspective_p", type=float, default=0.5)
+    # RandomGrayscale
+    parser.add_argument("--RandomGrayscale", action="store_true")
+    parser.add_argument("--gray_p", type=float, default=0.5)
 
     return parser
 
