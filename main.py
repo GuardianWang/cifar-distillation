@@ -1,3 +1,5 @@
+import os.path
+
 from model.get_model import get_model
 from dataset.cifar100 import get_data
 from optimizer import get_optimizer, get_scheduler
@@ -137,6 +139,8 @@ def train(cfg):
                 torch.save(model.state_dict(), cfg.model_path)
         scheduler.step()
 
+    if os.path.exists(cfg.model_path):
+        model.load_state_dict(torch.load(cfg.model_path))
     logging.info(f"===evaluate on test set===")
     test_step(model, criterion, test_loader, device=device, cfg=cfg)
     logging.info(f"===evaluate on training set===")
@@ -222,6 +226,10 @@ def distill(cfg):
                 torch.save(student.state_dict(), cfg.model_path)
         scheduler.step()
 
+    if os.path.exists(cfg.model_path):
+        student.load_state_dict(torch.load(cfg.model_path))
+    logging.info(f"===evaluate on test set===")
+    test_step(student, hard_criterion, test_loader, device=device, cfg=cfg)
     logging.info(f"===evaluate on training set===")
     test_step(student, hard_criterion, train_loader, device=device, cfg=cfg)
 
