@@ -28,7 +28,7 @@ class Scheduler:
 def get_scheduler(optimizer, cfg):
     body = lr_scheduler.CosineAnnealingWarmRestarts(optimizer, T_0=cfg.T_0, T_mult=cfg.T_mult)
     multiplier = lr_scheduler.MultiplicativeLR(optimizer, lambda x: cfg.mult_gamma ** x)
-    warmup = lr_scheduler.LambdaLR(optimizer, lambda x: 1 / cfg.warmup_iter * x)
+    warmup = lr_scheduler.LambdaLR(optimizer, lambda x: 1 / (cfg.warmup_iter + 1) * (x + 1))
     scheduler = Scheduler(warmup, cfg.warmup_iter, body, multiplier)
 
     return scheduler

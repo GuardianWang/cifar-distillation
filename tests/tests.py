@@ -37,6 +37,7 @@ class Tests(unittest.TestCase):
             lrs.append(scheduler.get_lr())
             optimizer.step()
             scheduler.step()
+        print(lrs[:2 * cfg.warmup_iter])
         plot_line(lrs)
 
     def test_multistep_scheduler(self):
