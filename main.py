@@ -328,6 +328,7 @@ def run():
     logging.basicConfig(filename=cfg.log_path, level=logging.INFO,
                         format='%(asctime)s - %(message)s', datefmt='%b-%d-%y %H:%M:%S')
     logging.info(f"config:\n{cfg_to_str(cfg)}")
+    logging.info(f"see {torch.cuda.device_count()} gpus")
     if cfg.tune:
         run_tune(cfg)
     elif cfg.train:
