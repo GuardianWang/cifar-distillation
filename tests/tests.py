@@ -2,6 +2,7 @@ from model.get_model import get_model
 from utils.parser import get_cfg
 from optimizer import get_optimizer, get_scheduler
 from dataset.cifar100 import get_data, get_classes
+from utils.decorators import Timer
 
 import torch.optim as optim
 from torch.optim import lr_scheduler
@@ -15,6 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 import unittest
+from time import sleep
 
 
 class Tests(unittest.TestCase):
@@ -159,6 +161,22 @@ class Tests(unittest.TestCase):
         show_batch(train_loader)
         print("show test loader")
         show_batch(test_loader)
+
+    def test_timer(self):
+        @Timer
+        def f(s=0):
+            if s:
+                sleep(s)
+            return
+        for _ in range(10):
+            f()
+            print(f.last)
+            print(f.ave)
+            print(f.ave_inv)
+        f(1)
+        print(f.last)
+        print(f.ave)
+        print(f.ave_inv)
 
 
 def plot_line(lrs):
