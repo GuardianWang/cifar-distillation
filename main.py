@@ -5,6 +5,7 @@ from dataset.cifar100 import get_data
 from optimizer import get_optimizer, get_scheduler
 from utils.parser import get_cfg, cfg_to_str
 from utils.meters import MinMaxMeter
+from utils.decorators import Timer
 
 from torch import nn
 import torch
@@ -21,6 +22,7 @@ from copy import deepcopy
 import psutil
 
 
+@Timer
 def train_step(model, criterion, optimizer, loader, device, cfg):
 
     ave_loss = meter.AverageValueMeter()
@@ -42,6 +44,7 @@ def train_step(model, criterion, optimizer, loader, device, cfg):
     }
 
 
+@Timer
 def distill_step(teacher, student, hard_criterion, soft_criterion, optimizer, loader, device, cfg):
 
     ave_hard_loss = meter.AverageValueMeter()
@@ -83,6 +86,7 @@ def distill_step(teacher, student, hard_criterion, soft_criterion, optimizer, lo
     }
 
 
+@Timer
 def test_step(model, criterion, loader, device, cfg):
     ave_loss = meter.AverageValueMeter()
     accuracy = meter.ClassErrorMeter(topk=cfg.acc_top_k, accuracy=True)
@@ -130,8 +134,10 @@ def train(cfg):
         logging.info(f"===epoch {epoch:04d}===")
         logging.info(f"lr: {scheduler.get_lr()}")
         train_loss = train_step(model, criterion, optimizer, train_loader, device=device, cfg=cfg)
+        logging.info(f"[epoch train fps: {len(train_dataset) / train_step.last:.4f}]")
         if epoch % cfg.test_epoch_freq == 0:
             test_stat = test_step(model, criterion, test_loader, device=device, cfg=cfg)
+            logging.info(f"[epoch test fps: {len(test_dataset) / test_step.last:.4f}]")
             is_test_best = epoch > 0 and test_stat["acc"][0] > min_max_test_acc.value(metric="max")
             min_max_test_acc.add(test_stat["acc"][0])
 
@@ -139,12 +145,8 @@ def train(cfg):
                 torch.save(model.state_dict(), cfg.model_path)
         scheduler.step()
 
-    if os.path.exists(cfg.model_path):
-        model.load_state_dict(torch.load(cfg.model_path))
-    logging.info(f"===evaluate on test set===")
-    test_step(model, criterion, test_loader, device=device, cfg=cfg)
-    logging.info(f"===evaluate on training set===")
-    test_step(model, criterion, train_loader, device=device, cfg=cfg)
+    logging.info(f"[ave train fps: {len(train_dataset) * train_step.ave_inv:.4f}]")
+    logging.info(f"[ave test fps: {len(test_dataset) * test_step.ave_inv:.4f}]")
 
 
 def tune_param(config: dict, cfg):
@@ -218,20 +220,18 @@ def distill(cfg):
         logging.info(f"lr: {scheduler.get_lr()}")
         train_loss = distill_step(teacher, student, hard_criterion, soft_criterion,
                                   optimizer, train_loader, device, cfg)
+        logging.info(f"[epoch train fps: {len(train_dataset) / distill_step.last:.4f}]")
         if epoch % cfg.test_epoch_freq == 0:
             test_stat = test_step(student, hard_criterion, test_loader, device=device, cfg=cfg)
+            logging.info(f"[epoch test fps: {len(test_dataset) / test_step.last:.4f}]")
             is_test_best = epoch > 0 and test_stat["acc"][0] > min_max_test_acc.value(metric="max")
             min_max_test_acc.add(test_stat["acc"][0])
             if epoch > cfg.save_model_cooldown and is_test_best:
                 torch.save(student.state_dict(), cfg.model_path)
         scheduler.step()
 
-    if os.path.exists(cfg.model_path):
-        student.load_state_dict(torch.load(cfg.model_path))
-    logging.info(f"===evaluate on test set===")
-    test_step(student, hard_criterion, test_loader, device=device, cfg=cfg)
-    logging.info(f"===evaluate on training set===")
-    test_step(student, hard_criterion, train_loader, device=device, cfg=cfg)
+    logging.info(f"[ave train fps: {len(train_dataset) * distill_step.ave_inv:.4f}]")
+    logging.info(f"[ave test fps: {len(test_dataset) * test_step.ave_inv:.4f}]")
 
 
 def test(cfg):
@@ -247,10 +247,14 @@ def test(cfg):
     logging.info(f"model:\n{summary(model, torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
     logging.info(f"load model weight {cfg.model_path}")
     model.load_state_dict(torch.load(cfg.model_path))
+
     logging.info(f"===evaluate on test set===")
     test_step(model, criterion, test_loader, device=device, cfg=cfg)
+    logging.info(f"[fps: {len(test_dataset) / test_step.last:.4f}]")
+
     logging.info(f"===evaluate on training set===")
     test_step(model, criterion, train_loader, device=device, cfg=cfg)
+    logging.info(f"[fps: {len(train_dataset) / test_step.last:.4f}]")
 
 
 def run_tune(cfg):
@@ -309,8 +313,13 @@ def run():
         run_tune(cfg)
     elif cfg.train:
         train(cfg)
+        cfg.train_batch_size = cfg.test_batch_size
+        test(cfg)
     elif cfg.distill:
         distill(cfg)
+        cfg.train_batch_size = cfg.test_batch_size
+        cfg.model = cfg.student
+        test(cfg)
     else:
         test(cfg)
 
