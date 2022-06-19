@@ -156,6 +156,8 @@ def tune_param(config: dict, cfg):
     for k, v in config:
         if hasattr(cfg, k):
             setattr(cfg, k, v)
+        else:
+            raise ValueError(f"{k} not recognized")
 
     if not torch.cuda.is_available() or cfg.not_use_gpu:
         device = torch.device("cpu")
