@@ -1,4 +1,5 @@
 import os.path
+import random
 
 from model.get_model import get_model
 from dataset.cifar100 import get_data
@@ -151,14 +152,10 @@ def train(cfg):
 
 def tune_param(config: dict, cfg):
     cfg = deepcopy(cfg)
-    cfg.optimizer = config["optimizer"]
-    cfg.lr = config["lr"]
-    cfg.momentum = config["momentum"]
-    cfg.weight_decay = config["weight_decay"]
-    cfg.nesterov = config["nesterov"]
-    cfg.amsgrad = config["amsgrad"]
-    cfg.train_batch_size = config["train_batch_size"]
-    cfg.beta1, cfg.beta2 = config["betas"]
+    # copy tune to cfg
+    for k, v in config:
+        if hasattr(cfg, k):
+            setattr(cfg, k, v)
 
     if not torch.cuda.is_available() or cfg.not_use_gpu:
         device = torch.device("cpu")
@@ -174,7 +171,8 @@ def tune_param(config: dict, cfg):
 
     optimizer = get_optimizer(cfg, model)
     train_dataset, train_loader = get_data(root=cfg.data_root, train=True,
-                                           batch_size=cfg.train_batch_size, extra_augment=cfg.extra_augment)
+                                           batch_size=cfg.train_batch_size, extra_augment=cfg.extra_augment,
+                                           cfg=cfg)
     test_dataset, test_loader = get_data(root=cfg.data_root, train=False, batch_size=cfg.test_batch_size)
     logging.info(f"model:\n{summary(model, torch.randn((1,) + test_dataset[0][0].shape, device=device))}")
 
@@ -260,14 +258,33 @@ def test(cfg):
 def run_tune(cfg):
     config = {
         # optimizer
-        "optimizer": tune.choice(["sgd", "adamw", "adam"]),
-        "lr": tune.loguniform(1e-4, 1),
-        "momentum": tune.loguniform(1e-2, 1e-5),
-        "weight_decay": tune.loguniform(1e-2, 1e-5),
-        "nesterov": tune.choice([True, False]),
+        "optimizer": tune.choice(["adamw", "adam"]),
+        "lr": tune.loguniform(1e-5, 1e-3),
+        "weight_decay": tune.loguniform(1e-5, 1e-3),
         "amsgrad": tune.choice([True, False]),
-        "betas": tune.choice([(0.5, 0.9), (0.9, 0.999)]),
-        "train_batch_size": tune.choice([64, 128, 256, 512, 1024]),
+        "beta1": tune.sample_from(lambda _: 1 - pow(10, random.uniform(-3, -0.3))),
+        "beta2": tune.sample_from(lambda _: 1 - pow(10, random.uniform(-3, -1))),
+        "train_batch_size": tune.choice([32, 64, 128, 256]),
+        # data augmentation
+        "ColorJitter": tune.choice([True, False]),
+        "brightness": tune.uniform(0, 1),
+        "contrast": tune.uniform(0, 1),
+        "saturation": tune.uniform(0, 1),
+        "hue": tune.uniform(0, 0.5),
+
+        "RandomAffine": tune.choice([True, False]),
+        "degrees": tune.uniform(0, 180),
+        "translate_M": tune.uniform(0, 1),
+        "scale_m": tune.uniform(0.5, 1),
+        "scale_M": tune.uniform(1, 2),
+        "shear": tune.uniform(0, 90),
+
+        "RandomPerspective": tune.choice([True, False]),
+        "distortion_scale": tune.uniform(0, 1),
+        "perspective_p": tune.uniform(0, 1),
+
+        "RandomGrayscale": tune.choice([True, False]),
+        "gray_p": tune.uniform(0, 1),
     }
     config_str = {k: v.domain_str for k, v in config.items()}
     logging.info(f"tune params:\n{config_str}")
