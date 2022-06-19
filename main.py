@@ -153,7 +153,7 @@ def train(cfg):
 def tune_param(config: dict, cfg):
     cfg = deepcopy(cfg)
     # copy tune to cfg
-    for k, v in config:
+    for k, v in config.items():
         if hasattr(cfg, k):
             setattr(cfg, k, v)
         else:
