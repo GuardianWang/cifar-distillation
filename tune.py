@@ -126,7 +126,7 @@ def run_tune(cfg):
             "RandomGrayscale": tune.choice([True, False]),
             "gray_p": tune.uniform(0, 1),
         })
-    if cfg.distill:
+    if cfg.tune_distill:
         config.update({
             "hard_weight": tune.uniform(0, 0.5),
             "temperature": tune.uniform(1, 50)
