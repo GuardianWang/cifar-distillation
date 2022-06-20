@@ -267,27 +267,35 @@ def run_tune(cfg):
         "beta1": tune.sample_from(lambda _: 1 - pow(10, random.uniform(-3, -0.3))),
         "beta2": tune.sample_from(lambda _: 1 - pow(10, random.uniform(-3, -1))),
         "train_batch_size": tune.choice([32, 64, 128, 256]),
-        # data augmentation
-        "ColorJitter": tune.choice([True, False]),
-        "brightness": tune.uniform(0, 1),
-        "contrast": tune.uniform(0, 1),
-        "saturation": tune.uniform(0, 1),
-        "hue": tune.uniform(0, 0.5),
-
-        "RandomAffine": tune.choice([True, False]),
-        "degrees": tune.uniform(0, 180),
-        "translate_M": tune.uniform(0, 1),
-        "scale_m": tune.uniform(0.5, 1),
-        "scale_M": tune.uniform(1, 2),
-        "shear": tune.uniform(0, 90),
-
-        "RandomPerspective": tune.choice([True, False]),
-        "distortion_scale": tune.uniform(0, 1),
-        "perspective_p": tune.uniform(0, 1),
-
-        "RandomGrayscale": tune.choice([True, False]),
-        "gray_p": tune.uniform(0, 1),
     }
+    if cfg.extra_augment:
+        config.update({
+            # data augmentation
+            "ColorJitter": tune.choice([True, False]),
+            "brightness": tune.uniform(0, 1),
+            "contrast": tune.uniform(0, 1),
+            "saturation": tune.uniform(0, 1),
+            "hue": tune.uniform(0, 0.5),
+
+            "RandomAffine": tune.choice([True, False]),
+            "degrees": tune.uniform(0, 180),
+            "translate_M": tune.uniform(0, 1),
+            "scale_m": tune.uniform(0.5, 1),
+            "scale_M": tune.uniform(1, 2),
+            "shear": tune.uniform(0, 90),
+
+            "RandomPerspective": tune.choice([True, False]),
+            "distortion_scale": tune.uniform(0, 1),
+            "perspective_p": tune.uniform(0, 1),
+
+            "RandomGrayscale": tune.choice([True, False]),
+            "gray_p": tune.uniform(0, 1),
+        })
+    if cfg.distill:
+        config.update({
+            "hard_weight": tune.uniform(0, 0.5),
+            "temperature": tune.uniform(1, 50)
+        })
     config_str = {k: v.domain_str for k, v in config.items()}
     logging.info(f"tune params:\n{config_str}")
 
