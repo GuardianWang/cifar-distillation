@@ -138,7 +138,7 @@ def run_tune(cfg):
         metric="test_acc",
         mode="max",
         max_t=cfg.tune_num_epochs,
-        grace_period=10,
+        grace_period=cfg.tune_grace_period,
         reduction_factor=2)
     reporter = tune.CLIReporter(
         metric_columns=["train_loss", "test_loss", "test_acc", "training_iteration"])

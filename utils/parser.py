@@ -13,6 +13,7 @@ def update_argument(parser: argparse.ArgumentParser):
     # tune
     parser.add_argument("--tune_num_samples", type=int, default=2)
     parser.add_argument("--tune_num_epochs", type=int, default=10)
+    parser.add_argument("--tune_grace_period", type=int, default=10)
 
     # logging
     parser.add_argument("--train_batch_print_freq", type=int, default=10)
