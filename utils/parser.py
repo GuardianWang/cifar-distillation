@@ -6,6 +6,7 @@ def update_argument(parser: argparse.ArgumentParser):
 
     # run
     parser_run_mode.add_argument("--tune", action="store_true")
+    parser_run_mode.add_argument("--tune_distill", action="store_true")
     parser_run_mode.add_argument("--train", action="store_true")
     parser_run_mode.add_argument("--distill", action="store_true")
 
