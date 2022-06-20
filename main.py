@@ -1,28 +1,16 @@
-import os.path
-import random
-
 from model.get_model import get_model
 from dataset.cifar100 import get_data
 from optimizer import get_optimizer, get_scheduler
 from utils.parser import get_cfg, cfg_to_str
 from utils.meters import MinMaxMeter
-from utils.decorators import Timer
 from step import train_step, test_step, distill_step
 from tune import run_tune
 
 from torch import nn
 import torch
-import torch.nn.functional as F
-from torchnet import meter
 from torchtoolbox.tools import summary
 
-import ray
-from ray import tune
-
 import logging
-from functools import partial
-from copy import deepcopy
-import psutil
 
 
 def train(cfg):
